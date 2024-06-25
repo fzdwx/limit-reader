@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["fzdwx"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/fzdwx/limit-reader"
+repository = "https://github.com/fzdwx/limit-reader"
 description = "A simple reader that limits the number of bytes read from an underlying reader."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
