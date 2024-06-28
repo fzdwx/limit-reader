@@ -1,15 +1,15 @@
 use std::io;
 use std::io::Read;
 
-struct LimiterReader<T: Read> {
+struct LimitReader<T: Read> {
     reader: T,
     limit: usize,
     reader_count: usize,
 }
 
-impl<T: Read> LimiterReader<T> {
+impl<T: Read> LimitReader<T> {
     fn new(reader: T, limit: usize) -> Self {
-        LimiterReader {
+        LimitReader {
             reader,
             limit,
             reader_count: 0,
@@ -17,7 +17,7 @@ impl<T: Read> LimiterReader<T> {
     }
 }
 
-impl<T: Read> Read for LimiterReader<T> {
+impl<T: Read> Read for LimitReader<T> {
     fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         let max_read = self.limit.min(buf.len()); // min of limit and buf.len()
         let bytes_read = self.reader.read(&mut buf[..max_read])?;
@@ -31,12 +31,12 @@ mod tests {
     use std::fs;
     use std::io::Read;
 
-    use crate::LimiterReader;
+    use crate::LimitReader;
 
     #[test]
     fn test_read() {
         let hello_txt = fs::File::open("testdata/hello.txt").unwrap();
-        let mut reader = LimiterReader::new(hello_txt, 5);
+        let mut reader = LimitReader::new(hello_txt, 5);
         let mut r1 = vec![0u8];
         reader.read_to_end(&mut r1).unwrap();
 
