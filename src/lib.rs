@@ -1,48 +1,34 @@
-use std::io;
-use std::io::Read;
+//! A `Read` that limits the number of bytes read from an underlying `Read`.
+//!
+//! ```
+//! use limit_reader::LimitReader;
+//! use std::{io::Read, fs::File};
+//! let file = File::open("testdata/hello.txt").unwrap();
+//! let mut reader = LimitReader::new(file, 5);
+//! let mut buffer = Vec::new();
+//! reader.read_to_end(&mut buffer).unwrap();
+//! assert!(buffer.len() == 5);
+//! assert_eq!(buffer, b"Hello");
+//!```
 
-struct LimitReader<T: Read> {
+use std::io::{Read, Result};
+
+pub struct LimitReader<T: Read> {
     reader: T,
     limit: usize,
-    reader_count: usize,
 }
 
 impl<T: Read> LimitReader<T> {
-    fn new(reader: T, limit: usize) -> Self {
-        LimitReader {
-            reader,
-            limit,
-            reader_count: 0,
-        }
+    pub fn new(reader: T, limit: usize) -> Self {
+        LimitReader { reader, limit }
     }
 }
 
 impl<T: Read> Read for LimitReader<T> {
-    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
-        let max_read = self.limit.min(buf.len()); // min of limit and buf.len()
-        let bytes_read = self.reader.read(&mut buf[..max_read])?;
-        self.reader_count += 1;
-        Ok(bytes_read)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::fs;
-    use std::io::Read;
-
-    use crate::LimitReader;
-
-    #[test]
-    fn test_read() {
-        let hello_txt = fs::File::open("testdata/hello.txt").unwrap();
-        let mut reader = LimitReader::new(hello_txt, 5);
-        let mut r1 = vec![0u8];
-        reader.read_to_end(&mut r1).unwrap();
-
-        let mut hello_txt = fs::File::open("testdata/hello.txt").unwrap();
-        let mut r2 = vec![0u8];
-        hello_txt.read_to_end(&mut r2).unwrap();
-        assert_eq!(r1, r2);
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
+        let limit = self.limit.min(buf.len());
+        let count = self.reader.read(&mut buf[..limit])?;
+        self.limit -= count;
+        Ok(count)
     }
 }
