@@ -1,14 +1,14 @@
 use std::io;
 use std::io::Read;
 
-struct LimitReader<T: Read> {
+pub struct LimitReader<T: Read> {
     reader: T,
     limit: usize,
     reader_count: usize,
 }
 
 impl<T: Read> LimitReader<T> {
-    fn new(reader: T, limit: usize) -> Self {
+    pub fn new(reader: T, limit: usize) -> Self {
         LimitReader {
             reader,
             limit,
